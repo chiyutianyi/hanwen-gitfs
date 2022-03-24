@@ -2,12 +2,12 @@ package fs
 
 import (
 	"log"
-	"sync"
 	"path/filepath"
+	"sync"
 
-	git "github.com/libgit2/git2go"
 	"github.com/hanwen/gitfs/manifest"
-	"github.com/hanwen/go-fuse/fuse/nodefs"
+	"github.com/hanwen/go-fuse/v2/fuse/nodefs"
+	git "github.com/libgit2/git2go"
 )
 
 type manifestFSRoot struct {
@@ -28,7 +28,7 @@ func NewManifestFS(m *manifest.Manifest, repoRoot string, gitOpts *GitFSOptions)
 		}
 		filtered.Project = append(filtered.Project, p)
 	}
-		
+
 	root := &manifestFSRoot{
 		Node:     nodefs.NewDefaultNode(),
 		repoMap:  map[string]nodefs.Node{},
@@ -38,12 +38,12 @@ func NewManifestFS(m *manifest.Manifest, repoRoot string, gitOpts *GitFSOptions)
 	type result struct {
 		name string
 		node nodefs.Node
-		err error
+		err  error
 	}
 
 	ch := make(chan result, len(root.manifest.Project))
 	for _, p := range root.manifest.Project {
-		go func (p manifest.Project) {
+		go func(p manifest.Project) {
 			// the spec isn't clear about this, but the git repo
 			// is placed locally at p.Path rather than p.Name
 			repo, err := git.OpenRepository(filepath.Join(repoRoot, p.Path) + ".git")
@@ -76,7 +76,7 @@ func NewManifestFS(m *manifest.Manifest, repoRoot string, gitOpts *GitFSOptions)
 		if res.err != nil {
 			firstError = res.err
 		} else {
-			root.repoMap[res.name]  = res.node
+			root.repoMap[res.name] = res.node
 		}
 	}
 	if firstError != nil {
@@ -97,7 +97,6 @@ func parents(path string) []string {
 	return r
 }
 
-
 func (r *manifestFSRoot) OnMount(fsConn *nodefs.FileSystemConnector) {
 	r.fsConn = fsConn
 
@@ -109,14 +108,14 @@ func (r *manifestFSRoot) OnMount(fsConn *nodefs.FileSystemConnector) {
 
 		todo[project.Path] = project
 	}
-	
+
 	for len(todo) > 0 {
 		next := map[string]manifest.Project{}
 		var wg sync.WaitGroup
 		for _, t := range todo {
 			foundParent := false
 			for _, p := range parents(t.Path) {
-				if _, ok := todo[p] ; ok {
+				if _, ok := todo[p]; ok {
 					foundParent = true
 					break
 				}

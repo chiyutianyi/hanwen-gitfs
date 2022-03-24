@@ -10,7 +10,8 @@ import (
 
 	"github.com/hanwen/gitfs/fs"
 	"github.com/hanwen/gitfs/manifest"
-	"github.com/hanwen/go-fuse/fuse/nodefs"
+	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/hanwen/go-fuse/v2/fuse/nodefs"
 )
 
 func main() {
@@ -62,6 +63,10 @@ func main() {
 		NegativeTimeout: time.Hour,
 		AttrTimeout:     time.Hour,
 		PortableInodes:  true,
+		Owner: &fuse.Owner{
+			Uid: uint32(os.Getuid()),
+			Gid: uint32(os.Getgid()),
+		},
 	})
 	if err != nil {
 		log.Fatalf("MountFileSystem: %v", err)
