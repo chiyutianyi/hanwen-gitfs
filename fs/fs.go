@@ -143,7 +143,7 @@ type linkNode struct {
 }
 
 func (n *linkNode) GetAttr(out *fuse.Attr, file nodefs.File, context *fuse.Context) (code fuse.Status) {
-	out.Mode = fuse.S_IFLNK
+	out.Mode = fuse.S_IFLNK | 0755
 	return fuse.OK
 }
 
